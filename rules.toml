@@ -1,0 +1,20 @@
+ephemeral = false
+wait_time = 0
+
+[[rules]]
+name = "Test1"
+inbound = false
+permit = false
+protocol = "tcp"
+weight = 0xFFFFFFFFFFFFFFFF
+remote_ip = "127.0.1.1/32"
+app_path = ""
+
+[[rules]]
+name = "Test2"
+inbound = false
+permit = false
+protocol = "tcp"
+weight = 0xFFFFFFFFFFFFFFFE
+remote_ip = ""
+app_path = '''C:\windows\system32\notepad.exe'''

@@ -50,7 +50,14 @@ pub(crate) fn get_rules_from_config_file(file: &mut File) -> Result<Settings, an
 			Some(ip) => match windows_wfp::IpAddrMask::from_cidr(&ip)
 			{
 				Ok(ip) => Some(ip),
-				Err(err_msg) => { return Err(anyhow!(err_msg)); }
+				Err(err_msg) =>
+				{
+					match ip.is_empty()
+					{
+						true => None,
+						false => return Err(anyhow!(err_msg))
+					}
+				}
 			}
 		};
 		let weight = match rule_raw.clone().weight
@@ -106,7 +113,8 @@ pub(crate) fn get_rules_from_config_file(file: &mut File) -> Result<Settings, an
 	{
 		rules: filter_rules,
 		ephemeral: settings_inner.ephemeral,
-		delete_rules: settings_inner.delete_rules
+		delete_rule_id: settings_inner.delete_rule_id,
+		wait_time: settings_inner.wait_time,
 	};
 	Ok(all_settings)
 }

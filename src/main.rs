@@ -3,20 +3,23 @@
 
 mod configuration;
 
-// use std::thread::sleep;
-// use std::time::Duration;
+use std::thread::sleep;
+use std::time::Duration;
+
+use anyhow::anyhow;
 use log::info;
 use simplelog::ColorChoice;
 use simplelog::Config;
 use simplelog::LevelFilter;
 use simplelog::TermLogger;
 use simplelog::TerminalMode;
-use windows_wfp::{FilterBuilder, FilterEnumerator, FilterRule};
+use windows_wfp::FilterBuilder;
+use windows_wfp::FilterRule;
+use windows_wfp::initialize_wfp;
 // use windows_wfp::WfpProvider;
 // use windows_wfp::WfpSublayer;
 use windows_wfp::WfpTransaction;
 use windows_wfp::WfpEngine;
-use windows_wfp::initialize_wfp;
 
 use crate::configuration::FilterRuleExt;
 
@@ -30,43 +33,44 @@ fn main() -> anyhow::Result<()>
 	initialize_wfp(&engine)?;
 	// WfpProvider::register(&engine)?;
 	// WfpSublayer::register(&engine)?;
-	let filter_ids = match settings.delete_rules
+	let filter_ids = match settings.delete_rule_id
 	{
-		true => delete_rules(&engine, &settings.rules)?,
-		false => add_rules(&engine, &settings.rules)?
+		Some(id) => delete_rule(&engine, id)?,
+		None => add_rules(&engine, &settings.rules)?
 	};
-	info!("Filter IDs processed: {filter_ids:?}!");
-	// sleep(Duration::from_secs(10));
-
-	// let txn = WfpTransaction::begin(&engine)?;
-	// if settings.delete_after
-	// {
-	// 	for filter_id in filter_ids { FilterBuilder::delete_filter(&engine, filter_id)?; }
-	// }
-	// txn.commit()?;
+	info!("Filter IDs processed: {}", filter_ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(", "));
+	sleep(Duration::from_secs(settings.wait_time));
 
 	return Ok(());
 }
 
-fn delete_rules(engine: &WfpEngine, rules: &Vec<FilterRule>) -> anyhow::Result<Vec<u64>>
+fn delete_rule(engine: &WfpEngine, rule_id: u64) -> anyhow::Result<Vec<u64>, anyhow::Error>
 {
 	info!("Deleting rules...");
-	let mut filter_ids = vec![];
-	let all_rules_installed = FilterEnumerator::all(&engine)?;
 	let txn = WfpTransaction::begin(&engine)?;
-	for rule_installed in all_rules_installed
+	let result = match FilterBuilder::delete_filter(&engine, rule_id)
 	{
-		for rule in rules
-		{
-			let matches_rule = rule.name.eq(&rule_installed.name);
-			if !matches_rule { continue; }
-			if FilterBuilder::delete_filter(&engine, rule_installed.id).is_err() { continue; }
-			filter_ids.push(rule_installed.id);
-			info!("\n{}", rule.display_multiline(Some(rule_installed.id)));
-		}
-	}
+		Ok(_) => Ok(vec![rule_id]),
+		Err(err) => Err(anyhow!(err))
+	};
 	txn.commit()?;
-	return Ok(filter_ids);
+	return result;
+	// let mut filter_ids = vec![];
+	// let all_rules_installed = FilterEnumerator::all(&engine)?;
+	// let txn = WfpTransaction::begin(&engine)?;
+	// for rule_installed in all_rules_installed
+	// {
+	// 	for rule in rules
+	// 	{
+	// 		let matches_rule = rule.name.eq(&rule_installed.name);
+	// 		if !matches_rule { continue; }
+	// 		if FilterBuilder::delete_filter(&engine, rule_installed.id).is_err() { continue; }
+	// 		filter_ids.push(rule_installed.id);
+	// 		info!("\n{}", rule.display_multiline(Some(rule_installed.id)));
+	// 	}
+	// }
+	// txn.commit()?;
+	// return Ok(filter_ids);
 }
 
 fn add_rules(engine: &WfpEngine, rules: &Vec<FilterRule>) -> anyhow::Result<Vec<u64>>
