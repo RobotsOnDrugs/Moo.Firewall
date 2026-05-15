@@ -11,7 +11,7 @@ pub(crate) struct RunSettings
 	pub(crate) wait_time: u64
 }
 
-pub(crate) fn get_run_settings_from_args(matches: ArgMatches) -> Result<RunSettings, anyhow::Error>
+pub(crate) fn get_run_settings_from_args(matches: ArgMatches) -> Result<RunSettings, color_eyre::eyre::Error>
 {
 	let ephemeral = matches.get_flag("ephemeral");
 	let delete_rule_id = matches.get_one::<u64>("delete_rule_id").map(|id| *id);

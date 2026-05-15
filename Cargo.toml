@@ -1,21 +1,17 @@
 [package]
 name = "moo_firewall"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 license = "MIT"
 
 [dependencies]
-anyhow = "1.0"
 clap = "4.6"
+color-eyre = { version = "0.6", features = ["color-spantrace"] }
 serde = { version = "1.0", features = ["derive"] }
 simplelog = "0.12"
 toml = "1.1"
 windows-wfp = "0.2"
-log = "0.4.29"
-
-#[dependencies.windows]
-#version = "0.62.2"
-#features = ["Win32_Foundation", "Win32_NetworkManagement_WindowsFilteringPlatform", "Win32_Security", "Win32_System_Rpc"]
+log = "0.4"
 
 [profile.release]
 strip = true

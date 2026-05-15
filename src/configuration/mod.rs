@@ -4,12 +4,13 @@
 use std::fs::OpenOptions;
 use std::os::windows::fs::OpenOptionsExt;
 
-use crate::configuration::config_file::get_rules_from_config_file;
 use clap::value_parser;
 use clap::Arg;
 use clap::Command;
 use serde::Deserialize;
 use windows_wfp::IpAddrMask;
+
+use crate::configuration::config_file::get_rules_from_config_file;
 
 #[derive(Debug, Clone, Deserialize)]
 struct RuleRaw
@@ -71,7 +72,7 @@ impl FilterRuleExt for windows_wfp::FilterRule
 mod config_file;
 mod args;
 
-pub(crate) fn get_settings() -> Result<Settings, anyhow::Error>
+pub(crate) fn get_settings() -> Result<Settings, color_eyre::eyre::Error>
 {
 	let arguments = &
 	[

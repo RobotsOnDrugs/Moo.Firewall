@@ -5,11 +5,12 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-use anyhow::anyhow;
+use color_eyre::eyre::eyre;
+
 use crate::configuration::Settings;
 use crate::configuration::SettingsRaw;
 
-pub(crate) fn get_rules_from_config_file(file: &mut File) -> Result<Settings, anyhow::Error>
+pub(crate) fn get_rules_from_config_file(file: &mut File) -> Result<Settings, color_eyre::eyre::Error>
 {
 	let mut settings_string = String::new();
 	file.read_to_string(&mut settings_string)?;
@@ -55,7 +56,7 @@ pub(crate) fn get_rules_from_config_file(file: &mut File) -> Result<Settings, an
 					match ip.is_empty()
 					{
 						true => None,
-						false => return Err(anyhow!(err_msg))
+						false => return Err(eyre!(err_msg))
 					}
 				}
 			}
@@ -87,7 +88,7 @@ pub(crate) fn get_rules_from_config_file(file: &mut File) -> Result<Settings, an
 				"esp" => Some(windows_wfp::Protocol::Esp),
 				"ah" => Some(windows_wfp::Protocol::Ah),
 				"icmpv6" => Some(windows_wfp::Protocol::Icmpv6),
-				_ => return Err(anyhow!("{protocol} is not a valid protocol"))
+				_ => return Err(eyre!("{protocol} is not a valid protocol"))
 			}
 		};
 		rule.app_path = match rule_raw.clone().app_path
@@ -101,9 +102,9 @@ pub(crate) fn get_rules_from_config_file(file: &mut File) -> Result<Settings, an
 					let path = PathBuf::from(path);
 					if path.exists()
 					{
-						if !path.is_file() { return Err(anyhow!("{} is not a file.", path.display())); }
+						if !path.is_file() { return Err(eyre!("{} is not a file.", path.display())); }
 						Some(path)
-					} else { return Err(anyhow!("{} does not exist.", path.display())); }
+					} else { return Err(eyre!("{} does not exist.", path.display())); }
 				}
 			}
 		};

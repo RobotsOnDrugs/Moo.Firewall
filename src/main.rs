@@ -6,7 +6,7 @@ mod configuration;
 use std::thread::sleep;
 use std::time::Duration;
 
-use anyhow::anyhow;
+use color_eyre::eyre::eyre;
 use log::info;
 use simplelog::ColorChoice;
 use simplelog::Config;
@@ -23,8 +23,10 @@ use windows_wfp::WfpEngine;
 
 use crate::configuration::FilterRuleExt;
 
-fn main() -> anyhow::Result<()>
+fn main() -> color_eyre::eyre::Result<()>
 {
+	color_eyre::install()?;
+
 	TermLogger::init(LevelFilter::Debug, Config::default(), TerminalMode::Mixed, ColorChoice::Auto)?;
 	let settings = configuration::get_settings()?;
 
@@ -44,14 +46,14 @@ fn main() -> anyhow::Result<()>
 	return Ok(());
 }
 
-fn delete_rule(engine: &WfpEngine, rule_id: u64) -> anyhow::Result<Vec<u64>, anyhow::Error>
+fn delete_rule(engine: &WfpEngine, rule_id: u64) -> color_eyre::eyre::Result<Vec<u64>, color_eyre::eyre::Error>
 {
 	info!("Deleting rules...");
 	let txn = WfpTransaction::begin(&engine)?;
 	let result = match FilterBuilder::delete_filter(&engine, rule_id)
 	{
 		Ok(_) => Ok(vec![rule_id]),
-		Err(err) => Err(anyhow!(err))
+		Err(err) => Err(eyre!(err))
 	};
 	txn.commit()?;
 	return result;
@@ -73,7 +75,7 @@ fn delete_rule(engine: &WfpEngine, rule_id: u64) -> anyhow::Result<Vec<u64>, any
 	// return Ok(filter_ids);
 }
 
-fn add_rules(engine: &WfpEngine, rules: &Vec<FilterRule>) -> anyhow::Result<Vec<u64>>
+fn add_rules(engine: &WfpEngine, rules: &Vec<FilterRule>) -> color_eyre::eyre::Result<Vec<u64>>
 {
 	let mut filter_ids = vec![];
 	let txn = WfpTransaction::begin(&engine)?;
