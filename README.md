@@ -54,7 +54,7 @@ Options:
           Print help
 ```
 `-e` and `-w` control the session settings as described in the example `rules.toml`. \
-`-d` is special and will delete a rule by ID. No rules are added when this option is specified, and the `ephemeral setting is ignored. \
+`-d` is special and will delete a rule by ID. No rules are added when this option is specified, and the `ephemeral` setting is ignored.
 
 ### Rule IDs
 This program will output the unique IDs of rules that are added. These IDs can be used to delete the rules later. Currently, there is no way to search rules or delete by name.
